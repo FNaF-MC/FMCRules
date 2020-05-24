@@ -1,0 +1,10 @@
+name: FMCRules
+main: hu.Pdani.FMCRules.FMCRulesPlugin
+version: '1.2.1'
+authors: [Pdani001]
+description: FNaFMC rules plugin
+softdepend: [Skript]
+permissions:
+  fmcrules.admin:
+    description: Admin permission
+    default: op

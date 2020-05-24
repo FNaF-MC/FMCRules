@@ -1,0 +1,94 @@
+# do not modify
+version: 2
+# should we disallow chat messages until the player accepts the rules?
+disallowchat: true
+# if this is set to false, the plugin won't register Skript classes
+useskript: true
+# self-explanatory: command names
+command:
+  rules: rules
+  acceptrules: acceptrules
+# supports color coding (e.g. &c)
+rules: |
+  Rule #1: Don't grief
+  Rule #2: Don't cheat
+  Rule #3: Have fun
+messages:
+  accept: 'To accept the rules, please type in /acceptrules'
+  admin: '<> To reload the config type in /rules reload'
+  reload: '<> Plugin config.yml reloaded.'
+  finished: 'You successfully finished the quiz! Have fun playing!'
+  done: 'You accepted the rules! Have fun playing!'
+  failed: 'You failed the quiz! Please read the rules carefully, and then attempt the quiz again!'
+  error:
+    accepted: 'You already accepted the rules.'
+    disallowed: 'You need to accept the rules in order to chat!'
+    config: 'There was a problem in the plugin configuration. Please contact an Administrator!'
+quiz:
+  # if this is set to false, the quiz will be disabled
+  enabled: true
+  # title displayed for the quiz (this is only used if random answers are disabled)
+  title: 'Rules Quiz'
+  # number of minimum correct answers to allow playing (must equal or be lower than the number of questions; if lower than 1 it will default to the number of questions)
+  minimum: 2
+  # should we fail the player when giving a wrong answer
+  failonwrong: false
+  # if the player fails (failonwrong or requirements not met) we restart the entire process by resending the rules
+  restartonfail: true
+  # number of answers shown to the user
+  answers:
+    wrong: 1
+    good: 1
+    # if set to false the answers will be displayed in a set position and the two numbers above this are ignored
+    random: true
+# self-explanatory; supports color coding (e.g. &c)
+questions:
+  '1':
+    question: 'Are you allowed to grief?'
+    wrong:
+      - 'Absolutely yes'
+      - 'Of course'
+      - 'Yeah!'
+    good:
+      - 'No'
+      - 'Never'
+      - 'Absolutely not'
+    # Material only (https://helpch.at/docs/1.12.2/org/bukkit/Material.html)
+    itemlist:
+      - COMMAND
+      - ANVIL
+      - BEDROCK
+      - COAL_BLOCK
+      - CACTUS
+  '2':
+    question: 'Are you allowed to cheat?'
+    wrong:
+      - 'Of course I can cheat!'
+      - 'Probably yes'
+      - 'I don''t know'
+    good:
+      - 'Absolutely not'
+      - 'Of course not!'
+      - 'It''s not allowed'
+    itemlist:
+      - COMMAND
+      - ANVIL
+      - BEDROCK
+      - COAL_BLOCK
+      - CACTUS
+  '3':
+    question: 'Have fun?'
+    wrong:
+      - 'No.'
+      - 'I ruin everyones fun'
+      - 'I don''t think so'
+    good:
+      - 'Thank you!'
+      - 'You too!'
+      - 'I will have fun!'
+    itemlist:
+      - COMMAND
+      - ANVIL
+      - BEDROCK
+      - COAL_BLOCK
+      - CACTUS
