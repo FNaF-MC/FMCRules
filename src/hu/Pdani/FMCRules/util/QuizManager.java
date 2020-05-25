@@ -10,6 +10,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.geysermc.floodgate.FloodgateAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import java.util.logging.Level;
 public class QuizManager {
     private FMCRulesPlugin plugin;
     private HashMap<Player,FRPlayer> quizlist = new HashMap<>();
+    private HashMap<Player,HashMap<Integer,String>> chatAnswers = new HashMap<>();
     private List<Player> stopClose = new ArrayList<>();
     private Integer[] intlist = {19,21,23,25};
 
@@ -70,11 +72,103 @@ public class QuizManager {
     }
 
     /**
-     * Open a quiz for the Player
+     * Send a quiz to the Player
      * @param frp the Player
+     * @return true if the request was successful
      * @since 1.3.0
      */
     private boolean getQuiz(FRPlayer frp){
+        if(plugin.getConfig().getBoolean("alwayschat",false) || (plugin.allowFloodgate() && FloodgateAPI.isBedrockPlayer(frp.getPlayer()))){
+            return getQuizChat(frp);
+        }
+        return getQuizMenu(frp);
+    }
+
+    /**
+     * Send quiz chat message to the Player
+     * @param frp the Player
+     * @return true if the request was successful
+     * @since 1.3.1
+     */
+    private boolean getQuizChat(FRPlayer frp){
+        Player player = frp.getPlayer();
+        RandomCollection<String> rcidlist = new RandomCollection<>();
+        double weight = 100.00 / (double) plugin.getIdlist().size();
+        for(String id : plugin.getIdlist()){
+            rcidlist.add(weight,id);
+        }
+        String next = rcidlist.next();
+        if(frp.getFinished().contains(next)){
+            while (frp.getFinished().contains(next)){
+                next = rcidlist.next();
+            }
+        }
+        try {
+            frp.newId(next);
+        } catch (FRException e) {
+            plugin.getLogger().warning(e.toString());
+            try {
+                next = rcidlist.next();
+                if(frp.getFinished().contains(next)){
+                    while (frp.getFinished().contains(next)){
+                        next = rcidlist.next();
+                    }
+                }
+                frp.newId(next);
+            } catch (FRException ex) {
+                plugin.getLogger().severe(e.toString());
+                player.sendMessage(c(plugin.getConfig().getString("messages.error.config")));
+                return false;
+            }
+        }
+        HashMap<Integer,String> answers = new HashMap<>();
+        StringBuilder sb = new StringBuilder();
+        List<String> goodlist = new ArrayList<>();
+        List<String> wronglist = new ArrayList<>();
+        Random rand = new Random();
+        sb.append(plugin.getConfig().getString("quiz.chat.prefix.question")).append(frp.getQuestion());
+        for(int i = 0; i < 4; i++) {
+            sb.append("\n");
+            if (rand.nextInt(2) == 1 && goodlist.size() < 2 || wronglist.size() == 2) {
+                String name = frp.newGood();
+                if (goodlist.contains(name)) {
+                    while (goodlist.contains(name)) {
+                        name = frp.newGood();
+                    }
+                }
+                sb.append(plugin.getConfig().getString("quiz.chat.prefix.answer")).append((i+1)).append(" - ").append(name);
+                goodlist.add(name);
+                answers.put(i+1,name);
+            } else {
+                String name = frp.newWrong();
+                if (wronglist.contains(name)) {
+                    while (wronglist.contains(name)) {
+                        name = frp.newWrong();
+                    }
+                }
+                wronglist.add(name);
+                sb.append(plugin.getConfig().getString("quiz.chat.prefix.answer")).append((i+1)).append(" - ").append(name);
+            }
+        }
+        String toend = plugin.getConfig().getString("messages.chat.toend");
+        toend = toend.replace("{c}",plugin.getConfig().getString("quiz.chat.cancel"));
+        sb.append("\n").append(plugin.getConfig().getString("quiz.chat.prefix.important")).append(plugin.getConfig().getString("messages.chat.help"));
+        sb.append("\n").append(plugin.getConfig().getString("quiz.chat.prefix.important")).append(toend);
+        player.sendMessage(c(sb.toString()));
+        if(chatAnswers.containsKey(player))
+            chatAnswers.replace(player,answers);
+        else
+            chatAnswers.put(player,answers);
+        return true;
+    }
+
+    /**
+     * Open a quiz menu for the Player
+     * @param frp the Player
+     * @since 1.3.1
+     * @return true if the request was successful
+     */
+    private boolean getQuizMenu(FRPlayer frp){
         Player player = frp.getPlayer();
         RandomCollection<String> rcidlist = new RandomCollection<>();
         double weight = 100.00 / (double) plugin.getIdlist().size();
@@ -256,13 +350,21 @@ public class QuizManager {
             }
             player.sendMessage(c(plugin.getConfig().getString("messages.finished")));
         } else {
-            if(plugin.getConfig().getBoolean("quiz.restartonfail",true)){
-                player.chat("/rules");
-            } else {
-                player.sendMessage(c(plugin.getConfig().getString("messages.failed")));
-            }
+            player.sendMessage(c(plugin.getConfig().getString("messages.failed")));
         }
         quizlist.remove(player);
+        chatAnswers.remove(player);
+    }
+
+    /**
+     * Check if the requested player is currently running a quiz.
+     * This was previously deprecated as it was unused.
+     * @param player the Player
+     * @return true if the player is running a quiz
+     * @since 1.3.1
+     */
+    public boolean hasQuiz(Player player){
+        return quizlist.containsKey(player);
     }
 
     /**
@@ -280,22 +382,22 @@ public class QuizManager {
     }
 
     /**
-     *
-     * @param player the Player
-     * @return true if the player is currently running a quiz
-     * @deprecated unused
-     */
-    public boolean hasQuiz(Player player){
-        return quizlist.containsKey(player);
-    }
-
-    /**
      * Remove the player from the running quiz list
      * @param player the Player
      * @since 1.0.8
      */
     public void disconnect(Player player){
         quizlist.remove(player);
+    }
+
+    /**
+     * Check if the given answer is correct
+     * @param player the Player
+     * @param id the id of the answer
+     * @return true if the given answer is correct
+     */
+    public boolean checkAnswer(Player player, int id){
+        return chatAnswers.get(player).containsKey(id);
     }
 
 

@@ -2,11 +2,13 @@ package hu.Pdani.FMCRules.listeners;
 
 import hu.Pdani.FMCRules.FMCRulesPlugin;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.geysermc.floodgate.FloodgateAPI;
 
 /**
  * @since 1.0
@@ -19,7 +21,29 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event){
-        if(plugin.getConfig().getBoolean("disallowchat",true) && !plugin.getStatus(event.getPlayer())){
+        Player player = event.getPlayer();
+        if(plugin.getConfig().getBoolean("alwayschat",false) || (plugin.allowFloodgate() && FloodgateAPI.isBedrockPlayer(player))){
+            if(plugin.getQuizManager().hasQuiz(player)){
+                event.setCancelled(true);
+                String msg = event.getMessage();
+                if(msg.equalsIgnoreCase(plugin.getConfig().getString("quiz.chat.cancel"))){
+                    plugin.getQuizManager().endQuiz(player,false);
+                    return;
+                }
+                int answer;
+                try {
+                    answer = Integer.parseInt(msg);
+                } catch (NumberFormatException e){
+                    String invalid = ChatColor.translateAlternateColorCodes('&',plugin.getConfig().getString("messages.chat.invalid"));
+                    invalid = invalid.replace("{a}",msg);
+                    player.sendMessage(invalid);
+                    return;
+                }
+                plugin.getQuizManager().nextQuiz(player,plugin.getQuizManager().checkAnswer(player,answer));
+                return;
+            }
+        }
+        if(plugin.getConfig().getBoolean("disallowchat",true) && !plugin.getStatus(player)){
             event.setCancelled(true);
             event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',plugin.getConfig().getString("messages.error.disallowed")));
         }
@@ -40,6 +64,7 @@ public class PlayerListener implements Listener {
             }
         }
         if(cmd.equalsIgnoreCase(plugin.getConfig().getString("command.rules"))){
+            event.setCancelled(true);
             if(args.length > 0) {
                 if (args[0].equalsIgnoreCase("reload")) {
                     if (event.getPlayer().hasPermission("fmcrules.admin")) {
@@ -51,7 +76,6 @@ public class PlayerListener implements Listener {
                 }
             }
             plugin.sendRules(event.getPlayer());
-            event.setCancelled(true);
         } else if(cmd.equalsIgnoreCase(plugin.getConfig().getString("command.acceptrules"))){
             plugin.startAccept(event.getPlayer());
             event.setCancelled(true);

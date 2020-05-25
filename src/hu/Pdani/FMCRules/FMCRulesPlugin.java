@@ -11,6 +11,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.geysermc.floodgate.BukkitPlugin;
+import org.geysermc.floodgate.FloodgateAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +30,7 @@ public class FMCRulesPlugin extends JavaPlugin {
     private static JavaPlugin plugin;
     private List<String> idlist = new ArrayList<>();
     private QuizManager quizManager;
+    private boolean allowFloodgate = false;
 
     @Override
     public void onEnable() {
@@ -60,6 +63,14 @@ public class FMCRulesPlugin extends JavaPlugin {
                 getLogger().log(Level.SEVERE,e.toString());
             }
         }
+        if(getConfig().getBoolean("floodgate",false)){
+            if(hasFloodgate()){
+                getLogger().log(Level.INFO,"Floodgate found, enabling support.");
+                allowFloodgate = true;
+            } else {
+                getLogger().log(Level.INFO,"Floodgate plugin is not found, but the 'floodgate' config option is set to true!");
+            }
+        }
         idlist.addAll(getConfig().getConfigurationSection("questions").getKeys(false));
         quizManager = new QuizManager(this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this),this);
@@ -80,6 +91,18 @@ public class FMCRulesPlugin extends JavaPlugin {
             return false;
         }
         return (pl instanceof Skript);
+    }
+
+    private boolean hasFloodgate() {
+        Plugin pl = getServer().getPluginManager().getPlugin("floodgate-bukkit");
+        if (pl == null) {
+            return false;
+        }
+        return (pl instanceof BukkitPlugin);
+    }
+
+    public boolean allowFloodgate() {
+        return allowFloodgate;
     }
 
     /**

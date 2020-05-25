@@ -1,9 +1,13 @@
 # do not modify
-version: 2
+version: 3
 # should we disallow chat messages until the player accepts the rules?
 disallowchat: true
 # if this is set to false, the plugin won't register Skript classes
 useskript: true
+# if enabled, the plugin will try to hook with floodgate
+floodgate: false
+# if this is set to true, the plugin will always send the quiz on the chat
+alwayschat: false
 # self-explanatory: command names
 command:
   rules: rules
@@ -24,17 +28,28 @@ messages:
     accepted: 'You already accepted the rules.'
     disallowed: 'You need to accept the rules in order to chat!'
     config: 'There was a problem in the plugin configuration. Please contact an Administrator!'
+  chat:
+    help: 'Type in the chat the number of your answer!'
+    toend: 'To end the quiz, please type ''{c}'' in the chat.'
+    invalid: 'The given answer ({a}) is invalid. Please make sure you input a number.'
 quiz:
   # if this is set to false, the quiz will be disabled
   enabled: true
+  # all options for the chat based quiz
+  chat:
+    # chat message to cancel the quiz
+    cancel: 'cancel'
+    # prefix of all messages
+    prefix:
+      answer: '&6'
+      important: '&c'
+      question: '&d'
   # title displayed for the quiz (this is only used if random answers are disabled)
   title: 'Rules Quiz'
   # number of minimum correct answers to allow playing (must equal or be lower than the number of questions; if lower than 1 it will default to the number of questions)
   minimum: 2
   # should we fail the player when giving a wrong answer
   failonwrong: false
-  # if the player fails (failonwrong or requirements not met) we restart the entire process by resending the rules
-  restartonfail: true
   # number of answers shown to the user
   answers:
     wrong: 1
