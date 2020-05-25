@@ -22,7 +22,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event){
         Player player = event.getPlayer();
-        if(plugin.getConfig().getBoolean("alwayschat",false) || (plugin.allowFloodgate() && FloodgateAPI.isBedrockPlayer(player))){
+        if(plugin.getConfig().getBoolean("quiz.alwayschat",false) || (plugin.allowFloodgate() && FloodgateAPI.isBedrockPlayer(player))){
             if(plugin.getQuizManager().hasQuiz(player)){
                 event.setCancelled(true);
                 String msg = event.getMessage();
