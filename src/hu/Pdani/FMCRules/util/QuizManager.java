@@ -78,7 +78,7 @@ public class QuizManager {
      * @since 1.3.0
      */
     private boolean getQuiz(FRPlayer frp){
-        if(plugin.getConfig().getBoolean("alwayschat",false) || (plugin.allowFloodgate() && FloodgateAPI.isBedrockPlayer(frp.getPlayer()))){
+        if(plugin.getConfig().getBoolean("quiz.alwayschat",false) || (plugin.allowFloodgate() && FloodgateAPI.isBedrockPlayer(frp.getPlayer()))){
             return getQuizChat(frp);
         }
         return getQuizMenu(frp);

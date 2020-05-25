@@ -1,13 +1,11 @@
 # do not modify
-version: 3
+version: 4
 # should we disallow chat messages until the player accepts the rules?
 disallowchat: true
 # if this is set to false, the plugin won't register Skript classes
 useskript: true
 # if enabled, the plugin will try to hook with floodgate
 floodgate: false
-# if this is set to true, the plugin will always send the quiz on the chat
-alwayschat: false
 # self-explanatory: command names
 command:
   rules: rules
@@ -35,6 +33,8 @@ messages:
 quiz:
   # if this is set to false, the quiz will be disabled
   enabled: true
+  # if this is set to true, the plugin will always send the quiz on the chat
+  alwayschat: false
   # all options for the chat based quiz
   chat:
     # chat message to cancel the quiz
