@@ -3,6 +3,8 @@
 
 **_Created by Pdani001_**
 
+### This plugin will no longer receive updates! If you need it updated, feel free to create a fork, and/or a pull request.
+
 For help in configuration visit the [config.yml](https://github.com/FNaF-MC/FMCRules/blob/master/src/config.yml) page.
 
 ### Permissions:
